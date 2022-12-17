@@ -16,8 +16,8 @@ set(GLAD_INCLUDE libs/glad/include)
 include_directories(${GLAD_INCLUDE})
 
 # glm
-add_subdirectory(libs/glm)
-list(APPEND LIBRARIES glm::glm)
+#add_subdirectory(libs/glm)
+#list(APPEND LIBRARIES glm::glm)
 
 # add filesystem
 if (USE_FILESYSTEM)
