@@ -3,21 +3,11 @@ project(CS171-hw1 LANGUAGES C CXX)
 
 option(USE_FILESYSTEM "use std::filesystem" off)
 
-# glfw
+#glfw
 option(GLFW_BUILD_TESTS off)
 option(GLFW_BUILD_EXAMPLES off)
 option(GLFW_BUILD_DOCS off)
-add_subdirectory(libs/glfw)
-include_directories(libs/glfw/include)
-list(APPEND LIBRARIES glfw ${glfw_LIBRARIES})
 
-# glad
-set(GLAD_INCLUDE libs/glad/include)
-include_directories(${GLAD_INCLUDE})
-
-# glm
-#add_subdirectory(libs/glm)
-#list(APPEND LIBRARIES glm::glm)
 
 # add filesystem
 if (USE_FILESYSTEM)
