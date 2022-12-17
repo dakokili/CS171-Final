@@ -1,13 +1,22 @@
-cmake_minimum_required(VERSION 3.16)
-project(CS171-hw1 LANGUAGES C CXX)
+cmake_minimum_required(VERSION 3.17)
+project(CS171-Final LANGUAGES C CXX)
 
 option(USE_FILESYSTEM "use std::filesystem" off)
 
-#glfw
 option(GLFW_BUILD_TESTS off)
 option(GLFW_BUILD_EXAMPLES off)
 option(GLFW_BUILD_DOCS off)
+find_package(glfw3 CONFIG REQUIRED)
+list(APPEND LIBRARIES glfw)
 
+find_package(glad CONFIG REQUIRED)
+list(APPEND LIBRARIES glad::glad)
+
+find_package(Eigen3 CONFIG REQUIRED)
+list(APPEND LIBRARIES Eigen3::Eigen)
+
+find_package(OpenVDB CONFIG REQUIRED)
+list(APPEND LIBRARIES OpenVDB::openvdb)
 
 # add filesystem
 if (USE_FILESYSTEM)
