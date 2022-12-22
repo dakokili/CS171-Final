@@ -8,17 +8,19 @@
 #include <openvdb/openvdb.h>
 
 #include <iostream>
+#include <vector>
 #include <cassert>
 
-template <typename T, int size>
-using Vec = Eigen::Matrix<T, size, 1>;
-
-using Vec3f = Eigen::Vector3f;
-using Vec3i = Eigen::Vector3i;
-using Vec2f = Eigen::Vector2f;
-using Vec2i = Eigen::Vector2i;
-using Vec4f = Eigen::Vector4f;
+//template <typename T, int size>
+//using Vec = Eigen::Matrix<T, size, 1>;
+using File = openvdb::io::File;
 using Mat3f = Eigen::Matrix3f;
+using Mat3d = Eigen::Matrix3d;
+using Mat4d = Eigen::Matrix4d;
+using Vec3s = Eigen::Vector3f;
+using Vec3d = Eigen::Vector3d;
+using Vec3i = Eigen::Vector3i;
+
 
 constexpr float PI = 3.141592653579f;
 constexpr float INV_PI = 0.31830988618379067154;

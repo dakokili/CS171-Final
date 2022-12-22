@@ -1,6 +1,7 @@
 #ifndef _UTILS_H_
 #define _UTILS_H_
 #include "defines.h"
+#include "grid.h"
 #include <string>
 /**
  * try and search target file in parent directories with max depth limit

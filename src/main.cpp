@@ -1,6 +1,18 @@
-#include <utils.h>
-int main(int argc, char* argv[]){
-    openvdb::io::File file(getPath("assets/single-res small.vdb",5));
-    std::cout<<file.filename();
-    return 0;
+#include "utils.h"
+
+int main()
+{
+    std::vector<Grid> grids;
+    openvdb::initialize();
+    File file(getPath("/assets/multi-res small.vdb"));
+    file.open();
+    openvdb::GridPtrVecPtr sourcegrids = file.getGrids();
+    for(auto basegrid : *sourcegrids){
+        basegrid->print();
+        openvdb::Vec3SGrid::Ptr sourcegrid = openvdb::gridPtrCast<openvdb::Vec3SGrid>(basegrid);
+        grids.push_back(Grid(sourcegrid));
+    }
+    file.close();
+
+    
 }
