@@ -6,28 +6,29 @@
 class Image{
 public:
   Image();
-  ~Image();
-  void writefile();
+  void writefile(std::string filename);
+  void setpixel(int x,int y,Vec3i RGBcolor);
   Vec2i resolution;
-  Vec3i* RGBpixels;
+  std::vector<uint8_t> RGBpixels;
 };
 
 class Camera {
  public:
+  Camera();
   Camera(Vec3f pos,Vec3f lookat,float new_fov=45.0f,Vec3f refup={0,1,0});
   void lookAt(Vec3f lookat, Vec3f refup = {0, 1, 0});
   void setPosition(Vec3f pos);
   void setFov(float new_fov);
+  void shotimage(Scene& scene);
 
  private:
-  Vec3f position={0,0,-1};
-  Vec3f forward={0,0,1};
-  Vec3f up={0,1,0};
-  Vec3f right={1,0,0};
-  Vec3f ref_up={0,1,0};
-  float fov=45.0f;
+  Vec3f position;
+  Vec3f forward;
+  Vec3f up;
+  Vec3f right;
+  Vec3f ref_up;
+  float fov;
   Image image;
-  void shotimage(Scene& scene);
 };
 
 #endif // CAMERA_H_
