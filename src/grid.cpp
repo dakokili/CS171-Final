@@ -1,4 +1,5 @@
 #include "grid.h"
+
 Grid::Grid(openvdb::Vec3SGrid::Ptr grid){
     for(auto metadata=grid->beginMeta();metadata!=grid->endMeta();++metadata){
         if(metadata->first=="dx") dx=grid->metaValue<double>(metadata->first);
