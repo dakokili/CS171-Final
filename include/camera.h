@@ -20,7 +20,8 @@ class Camera {
   void setPosition(Vec3f pos);
   void setFov(float new_fov);
   void shotimage(Scene& scene);
-
+  openvdb::math::Ray<float> generateray(int x,int y);
+  Vec3i transferfunction(std::vector<Interaction>& interactions);
  private:
   Vec3f position;
   Vec3f forward;
