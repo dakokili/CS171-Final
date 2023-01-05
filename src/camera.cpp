@@ -64,7 +64,7 @@ void Camera::shotimage(Scene& scene){
     int count=0;
     omp_set_nested(1);
     omp_set_dynamic(0);
-#pragma omp parallel for schedule(guided) num_threads(4) private(j)
+#pragma omp parallel for schedule(guided) num_threads(8) private(j)
     for(i=0;i<image.resolution.y();i++){
 #pragma omp atomic
         ++count;
@@ -97,11 +97,11 @@ Vec3i Camera::transferfunction(std::vector<Interaction>& interactions){
         for(int i=0 ; i < length ; i++)
         {
             s = s + interactions[i].value*t;
-            t = t * 1;
+            t = t * 1.f;
         }
-        s = s * 100;
-        s = s /8000;
-        if (s>1) s=1;
+        s = s * 100.0f;
+        s = s /8000.0f;
+        if (s>1.0f) s=1.0f;
         radience[2] = 255*powf(s, 1.f / 2.2f);  
         return radience;
     }

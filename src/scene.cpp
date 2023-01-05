@@ -31,10 +31,13 @@ void Scene::intersect(openvdb::math::Ray<float>& ray, std::vector<Interaction>& 
                 interaction.pos[0]=pos[0];
                 interaction.pos[1]=pos[1];
                 interaction.pos[2]=pos[2];
+                interaction.scale=scale;
                 interaction.value=acc.getValue(dda.voxel()).length();
                 interactions.push_back(interaction);
             }
         }
     }
-    std::sort(interactions.begin(),interactions.end(),[](Interaction& a,Interaction& b){return a.dist<b.dist;});
+    std::sort(interactions.begin(),interactions.end(),[](Interaction& a,Interaction& b){
+        if(a.dist==b.dist) return a.scale>b.scale;
+        return a.dist<b.dist;});
 };
