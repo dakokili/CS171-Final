@@ -1,4 +1,5 @@
 #include "camera.h"
+#include "utils.h"
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image.h>
@@ -72,6 +73,9 @@ void Camera::shotimage(Scene& scene){
         for(j=0;j<image.resolution.x();j++) {
             std::vector<Interaction> interactions;
             scene.intersect(generateray(j,i),interactions);
+            if(j==400&&i==500){
+                for(auto inter:interactions) std::cout<<inter.value<<' ';
+            }
             image.setpixel(j,image.resolution.y()-1-i,transferfunction(interactions));
         }
     }
@@ -91,18 +95,15 @@ Vec3i Camera::transferfunction(std::vector<Interaction>& interactions){
     else //return Vec3i(floor(interactions[0].pos[0]*20),floor(interactions[0].pos[1]*20),floor(interactions[0].pos[2]*20));
     {
         int length = interactions.size();
-        Vec3i radience={0,0,0};
+        Vec3f radiance={0,0,0};
         float t=1;
         float s=0;
         for(int i=0 ; i < length ; i++)
         {
             s = s + interactions[i].value*t;
-            t = t * 1.f;
+            t = t * 0.f;
         }
-        s = s * 100.0f;
-        s = s /8000.0f;
-        if (s>1.0f) s=1.0f;
-        radience[2] = 255*powf(s, 1.f / 2.2f);  
-        return radience;
+        radiance[2]=s;
+        return converttoRGB(radiance);
     }
 }

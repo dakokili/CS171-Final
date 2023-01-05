@@ -7,4 +7,5 @@
  */
 std::string getPath(const std::string &target, int depth = 5);
 
+Vec3i converttoRGB(Vec3f color);
 #endif

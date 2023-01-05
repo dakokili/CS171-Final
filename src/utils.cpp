@@ -31,4 +31,15 @@ std::string getPath(const std::string &target, int depth) {
   LOG_ERR("failed to get file: " + target);
   return target;
 }
+
+Vec3i converttoRGB(Vec3f color){
+  if(color.x()>1.0f) color.x()=1.0f;
+  if(color.y()>1.0f) color.y()=1.0f;
+  if(color.z()>1.0f) color.z()=1.0f;
+  Vec3i ans;
+  ans.x()=powf(color.x(),1.f/2.2f);
+  ans.y()=powf(color.y(),1.f/2.2f);
+  ans.z()=powf(color.z(),1.f/2.2f);
+  return ans;
+};
 #endif
