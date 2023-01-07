@@ -37,9 +37,9 @@ Vec3i converttoRGB(Vec3f color){
   if(color.y()>1.0f) color.y()=1.0f;
   if(color.z()>1.0f) color.z()=1.0f;
   Vec3i ans;
-  ans.x()=powf(color.x(),1.f/2.2f);
-  ans.y()=powf(color.y(),1.f/2.2f);
-  ans.z()=powf(color.z(),1.f/2.2f);
+  ans.x()=floor(255.f*powf(color.x(),1.f/2.2f));
+  ans.y()=floor(255.f*powf(color.y(),1.f/2.2f));
+  ans.z()=floor(255.f*powf(color.z(),1.f/2.2f));
   return ans;
 };
 #endif

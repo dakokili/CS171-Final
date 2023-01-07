@@ -16,7 +16,14 @@ void Scene::loadgridfromfile(std::string filepath){
     file.close();
 };
 
+void Scene::loadobjectfromfile(std::string filepath,float scale,Vec3f pos){
+    objects.push_back(TriangleMesh(getPath(filepath),scale,pos));
+};
+
 void Scene::intersect(openvdb::math::Ray<float>& ray, std::vector<Interaction>& interactions){
+    for(auto& object:objects){
+        object.intersect(ray,interactions);
+    }
     for(auto vdbgrid: vdbgrids){
         float scale=vdbgrid->voxelSize()[0];
         auto acc = vdbgrid->getAccessor();
@@ -27,6 +34,7 @@ void Scene::intersect(openvdb::math::Ray<float>& ray, std::vector<Interaction>& 
         while(dda.step()){
             if(acc.isValueOn(dda.voxel())){
                 interaction.dist=dda.time()*scale;
+                //pos=ray(dda.time()*scale);
                 pos=vdbgrid->indexToWorld(dda.voxel());
                 interaction.pos[0]=pos[0];
                 interaction.pos[1]=pos[1];

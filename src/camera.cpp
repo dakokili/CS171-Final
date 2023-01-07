@@ -6,6 +6,7 @@
 #include <stb_image_write.h>
 #include "interaction.h"
 #include <omp.h>
+#include <algorithm>
 
 Image::Image(){
     resolution.x() = 800;
@@ -73,9 +74,9 @@ void Camera::shotimage(Scene& scene){
         for(j=0;j<image.resolution.x();j++) {
             std::vector<Interaction> interactions;
             scene.intersect(generateray(j,i),interactions);
-            if(j==400&&i==500){
-                for(auto inter:interactions) std::cout<<inter.value<<' ';
-            }
+            //if(j==390&&i==400){
+                //for(auto inter:interactions) std::cout<<inter.pos<<' '<<inter.value<<' ';
+            //}
             image.setpixel(j,image.resolution.y()-1-i,transferfunction(interactions));
         }
     }
@@ -96,14 +97,23 @@ Vec3i Camera::transferfunction(std::vector<Interaction>& interactions){
     {
         int length = interactions.size();
         Vec3f radiance={0,0,0};
-        float t=1;
-        float s=0;
+        Vec3f s={0,0,0};
+        float t=0.001f;
+        bool bound=false;
         for(int i=0 ; i < length ; i++)
         {
-            s = s + interactions[i].value*t;
-            t = t * 0.f;
+            if(!bound&&interactions[i].type==Interaction::VOXEL){
+                s+=t*Vec3f(0,1,0);
+                bound=true;
+            } 
+            if(interactions[i].value<2.f/30.f){
+                s+=t*Vec3f(1,0,0);
+            }
+            //if(interactions[i].value>0.0680f&&interactions[i].value<=0.0681f){
+            //    s+=t*Vec3f(0,0,1);
+            //}
+            
         }
-        radiance[2]=s;
-        return converttoRGB(radiance);
+        return converttoRGB(s);
     }
 }
