@@ -29,7 +29,7 @@ endif()
 # set source files and add executable
 file(GLOB SRC_FILES src/*.cpp)
 
-add_executable(main ${SRC_FILES} ${INTERNAL_SRC_FILES} src/glad.c)
+add_executable(main ${SRC_FILES} ${INTERNAL_SRC_FILES})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Ox /openmp")
 target_include_directories(main PRIVATE include)
 target_compile_features(main PRIVATE cxx_std_17)

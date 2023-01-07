@@ -19,7 +19,7 @@ using Vec2i = Eigen::Vector2i;
 using Vec2f = Eigen::Vector2f;
 
 constexpr float RAY_DEFAULT_MIN = 1e-5;
-constexpr float RAY_DEFAULT_MAX = 1e2;
+constexpr float RAY_DEFAULT_MAX = 30;
 constexpr float PI = 3.141592653579f;
 constexpr float INV_PI = 0.31830988618379067154;
 

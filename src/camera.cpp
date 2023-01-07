@@ -9,8 +9,8 @@
 #include <algorithm>
 
 Image::Image(){
-    resolution.x() = 800;
-    resolution.y() = 800;
+    resolution.x() = 2500;
+    resolution.y() = 1000;
     RGBpixels.swap(std::vector<uint8_t>(resolution.x()*resolution.y()*3,0));
 };
 
@@ -70,13 +70,13 @@ void Camera::shotimage(Scene& scene){
     for(i=0;i<image.resolution.y();i++){
 #pragma omp atomic
         ++count;
-        printf("\r%.02f%%", count * 100.0 / image.resolution.y());
+        //printf("\r%.02f%%", count * 100.0 / image.resolution.y());
         for(j=0;j<image.resolution.x();j++) {
             std::vector<Interaction> interactions;
             scene.intersect(generateray(j,i),interactions);
-            //if(j==390&&i==400){
-                //for(auto inter:interactions) std::cout<<inter.pos<<' '<<inter.value<<' ';
-            //}
+            if(j==1500&&i==500){
+                for(auto inter:interactions) std::cout<<inter.pos<<' '<<inter.value<<'\n';
+            }
             image.setpixel(j,image.resolution.y()-1-i,transferfunction(interactions));
         }
     }
@@ -84,7 +84,7 @@ void Camera::shotimage(Scene& scene){
 };
 
 openvdb::math::Ray<float> Camera::generateray(int x,int y){
-    Vec3f direction=forward+tanf(fov*PI/360.0f)*up*(float(y)-400.0f+0.5f)/400.0f+tanf(fov*PI/360.0f)*right*(float(x)-400.0f+0.5f)/400.0f;
+    Vec3f direction=forward+tanf(fov*PI/360.0f)*up*(float(y)-float(image.resolution.y()/2)+0.5f)/float(image.resolution.y()/2)+tanf(fov*PI/360.0f)*right*(float(x)-float(image.resolution.x()/2)+0.5f)/float(image.resolution.y()/2);
     direction.normalize();
     return openvdb::math::Ray<float>(openvdb::Vec3s(position.x(),position.y(),position.z()),
     openvdb::Vec3s(direction.x(),direction.y(),direction.z()),
@@ -98,17 +98,26 @@ Vec3i Camera::transferfunction(std::vector<Interaction>& interactions){
         int length = interactions.size();
         Vec3f radiance={0,0,0};
         Vec3f s={0,0,0};
-        float t=0.001f;
+        float t=.8f;
         bool bound=false;
         for(int i=0 ; i < length ; i++)
         {
-            if(!bound&&interactions[i].type==Interaction::VOXEL){
-                s+=t*Vec3f(0,1,0);
-                bound=true;
-            } 
-            if(interactions[i].value<2.f/30.f){
-                s+=t*Vec3f(1,0,0);
+            //if(!bound&&interactions[i].type==Interaction::VOXEL){
+            //    s+=t*Vec3f(0,1,0);
+            //    bound=true;
+            //} 
+            //if(interactions[i].value<1.9f/30.f&&interactions[i].value>=1.2f/30.f){
+            //    s+=t*Vec3f(1,0,0);
+            //    t*=0.9f;
+            //}
+            if(interactions[i].value<1.9f/30.f&&interactions[i].value>0.f/30.f){
+                s+=t*Vec3f(interactions[i].value*30.0f/1.9f,1.f-interactions[i].value*30.0f/1.9f,0);
+                t*=.2f;
             }
+            //if(interactions[i].value<0.8f/30.f&&interactions[i].value>=0.2f/30.f){
+            //    s+=t*Vec3f(0,0,1);
+            //    t*=0.9f;
+            //}
             //if(interactions[i].value>0.0680f&&interactions[i].value<=0.0681f){
             //    s+=t*Vec3f(0,0,1);
             //}

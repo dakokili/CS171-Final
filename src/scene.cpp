@@ -1,6 +1,7 @@
 #include "scene.h"
 #include "utils.h"
 #include <algorithm>
+#include <openvdb/tools/Interpolation.h>
 
 void Scene::loadgridfromfile(std::string filepath){
     openvdb::initialize();
@@ -33,14 +34,48 @@ void Scene::intersect(openvdb::math::Ray<float>& ray, std::vector<Interaction>& 
         interaction.type=interaction.VOXEL;
         while(dda.step()){
             if(acc.isValueOn(dda.voxel())){
-                interaction.dist=dda.time()*scale;
-                //pos=ray(dda.time()*scale);
-                pos=vdbgrid->indexToWorld(dda.voxel());
+                interaction.dist=dda.next()*scale;
+                pos=ray.worldToIndex(*vdbgrid)(dda.time());
+                //std::cout<<pos;
+                //std::cout<<dda.voxel()<<'\n';
                 interaction.pos[0]=pos[0];
                 interaction.pos[1]=pos[1];
                 interaction.pos[2]=pos[2];
                 interaction.scale=scale;
-                interaction.value=acc.getValue(dda.voxel()).length();
+                float data[2][2][2];
+                openvdb::Coord ijk(openvdb::tools::local_util::floorVec3(pos));
+                data[0][0][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
+                ijk[2]+=1;
+                data[0][0][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
+                ijk[1]+=1;
+                data[0][1][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
+                ijk[2]-=1;
+                data[0][1][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
+                ijk[0]+=1;
+                ijk[1]-=1;
+                data[1][0][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
+                ijk[2]+=1;
+                data[1][0][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
+                ijk[1]+=1;
+                data[1][1][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
+                ijk[2]-=1;
+                data[1][1][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
+                openvdb::Vec3R uvw=openvdb::Vec3R(pos)-openvdb::tools::local_util::floorVec3(pos);
+                auto _interpolate = [](float a, float b, float weight)
+                {
+                    const auto temp = (b - a) * weight;
+                    return (a + temp);
+                };
+                interaction.value=_interpolate(
+                    _interpolate(
+                        _interpolate(data[0][0][0], data[0][0][1], uvw[2]),
+                        _interpolate(data[0][1][0], data[0][1][1], uvw[2]),
+                        uvw[1]),
+                    _interpolate(
+                        _interpolate(data[1][0][0], data[1][0][1], uvw[2]),
+                        _interpolate(data[1][1][0], data[1][1][1], uvw[2]),
+                        uvw[1]),
+                uvw[0]);
                 interactions.push_back(interaction);
             }
         }
