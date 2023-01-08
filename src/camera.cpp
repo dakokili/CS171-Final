@@ -110,6 +110,7 @@ Vec3i Camera::transferfunction(std::vector<Interaction>& interactions){
             //    s+=t*Vec3f(1,0,0);
             //    t*=0.9f;
             //}
+            
             if(interactions[i].value<1.9f/30.f&&interactions[i].value>0.f/30.f){
                 s+=t*Vec3f(interactions[i].value*30.0f/1.9f,1.f-interactions[i].value*30.0f/1.9f,0);
                 t*=.2f;
