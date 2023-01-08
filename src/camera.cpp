@@ -95,22 +95,22 @@ Vec3i Camera::transferfunction(std::vector<Interaction>& interactions){
         int length = interactions.size();
         Vec3f radiance={0,0,0};
         Vec3f s={0,0,0};
-        float t=.2f;
+        float t=1.f;
         bool bound=false;
         for(int i=0 ; i < length ; i++)
         {
             if(interactions[i].type==Interaction::VOXEL){
                     if(interactions[i].value<1.9f/30.f&&interactions[i].value>1.8f/30.f){
                         s+=t*Vec3f((interactions[i].value*30.0f-1.8f)/0.2f+0.5f,(1.9f-interactions[i].value*30.0f)/0.2f,0);
-                        t*=.8f;
+                        t*=.0f;
                     }
                     else if(interactions[i].value<=1.8f/30.f&&interactions[i].value>1.5f/30.f){
                         s+=t*Vec3f((interactions[i].value*30.0f-1.5f)/0.6f,(1.8f-interactions[i].value*30.0f)/0.6f+0.5f,0);
-                        t*=.8f;
+                        t*=.0f;
                     }
                     else if(interactions[i].value<=1.5f/30.f&&interactions[i].value>=0.f/30.f){
                         s+=t*Vec3f(0,interactions[i].value*30.0f/1.5f,(1.5f-interactions[i].value*30.0f)/1.5f);
-                        t*=.8f;
+                        t*=.0f;
                     }
             }
             else if(interactions[i].type==Interaction::GEOMETRY){

@@ -18,7 +18,6 @@ void Scene::loadgridfromfile(std::string filepath){
         box.top=sourcegrid->indexToWorld(openvdb::Coord(basegrid->metaValue<openvdb::Vec3i>(openvdb::Name(sourcegrid->META_FILE_BBOX_MAX))));
         std::cout<<box.bottom<<box.top<<'\n';
         vdbAABBboxes.push_back(box);
-        //grids.push_back(Grid(sourcegrid));
     }
     file.close();
 };
@@ -56,133 +55,14 @@ void Scene::intersect(openvdb::math::Ray<float>& ray, std::vector<Interaction>& 
                 openvdb::Vec3R uvw=openvdb::Vec3R(indexpos)-openvdb::tools::local_util::floorVec3(indexpos);
                 float data[4][4][4];
                 ijk[0]--;ijk[1]--;ijk[2]--;
-                data[0][0][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[0][0][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[0][0][2]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[0][0][3]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]-=3;ijk[1]+=1;
-                data[0][1][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[0][1][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[0][1][2]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[0][1][3]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]-=3;ijk[1]+=1;
-                data[0][2][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[0][2][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[0][2][2]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[0][2][3]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]-=3;ijk[1]+=1;
-                data[0][3][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[0][3][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[0][3][2]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[0][3][3]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]-=3;ijk[1]-=3;ijk[0]+=1;
-                data[1][0][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[1][0][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[1][0][2]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[1][0][3]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]-=3;ijk[1]+=1;
-                data[1][1][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[1][1][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[1][1][2]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[1][1][3]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]-=3;ijk[1]+=1;
-                data[1][2][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[1][2][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[1][2][2]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[1][2][3]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]-=3;ijk[1]+=1;
-                data[1][3][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[1][3][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[1][3][2]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[1][3][3]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]-=3;ijk[1]-=3;ijk[0]+=1;
-                data[2][0][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[2][0][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[2][0][2]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[2][0][3]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]-=3;ijk[1]+=1;
-                data[2][1][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[2][1][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[2][1][2]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[2][1][3]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]-=3;ijk[1]+=1;
-                data[2][2][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[2][2][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[2][2][2]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[2][2][3]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]-=3;ijk[1]+=1;
-                data[2][3][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[2][3][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[2][3][2]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[2][3][3]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]-=3;ijk[1]-=3;ijk[0]+=1;
-                data[3][0][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[3][0][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[3][0][2]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[3][0][3]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]-=3;ijk[1]+=1;
-                data[3][1][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[3][1][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[3][1][2]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[3][1][3]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]-=3;ijk[1]+=1;
-                data[3][2][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[3][2][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[3][2][2]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[3][2][3]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]-=3;ijk[1]+=1;
-                data[3][3][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[3][3][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[3][3][2]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[3][3][3]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
+                for(int x=0;x<4;x++){
+                    for(int y=0;y<4;y++){
+                        for(int z=0;z<4;z++){
+                            openvdb::Coord realijk(ijk[0]+x,ijk[1]+y,ijk[2]+z);
+                            data[x][y][z]=(acc.isValueOn(realijk))? acc.getValue(realijk).length():1;
+                        }
+                    }
+                }
                 interaction.value=_interpolate(
                     _interpolate(
                         _interpolate(data[0][0][0], data[0][0][1], data[0][0][2], data[0][0][3], uvw[2]),
@@ -216,7 +96,8 @@ void Scene::intersect(openvdb::math::Ray<float>& ray, std::vector<Interaction>& 
                 time+=scale;
         }
         else{
-            time+=vdbgrids[0]->voxelSize()[0];
+            break;
+            //time+=vdbgrids[0]->voxelSize()[0];
         }
     }
     std::sort(interactions.begin(),interactions.end(),[](Interaction& a,Interaction& b){
