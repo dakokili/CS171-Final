@@ -12,6 +12,12 @@ void Scene::loadgridfromfile(std::string filepath){
         basegrid->print();
         openvdb::Vec3SGrid::Ptr sourcegrid = openvdb::gridPtrCast<openvdb::Vec3SGrid>(basegrid);
         vdbgrids.push_back(sourcegrid->deepCopy());
+        vdbAABB box;
+        auto acc=sourcegrid->getAccessor();
+        box.bottom=sourcegrid->indexToWorld(openvdb::Coord(0,0,0));
+        box.top=sourcegrid->indexToWorld(openvdb::Coord(basegrid->metaValue<openvdb::Vec3i>(openvdb::Name(sourcegrid->META_FILE_BBOX_MAX))));
+        std::cout<<box.bottom<<box.top<<'\n';
+        vdbAABBboxes.push_back(box);
         //grids.push_back(Grid(sourcegrid));
     }
     file.close();
@@ -22,67 +28,33 @@ void Scene::loadobjectfromfile(std::string filepath,float scale,Vec3f pos){
 };
 
 void Scene::intersect(openvdb::math::Ray<float>& ray, std::vector<Interaction>& interactions){
+    auto _interpolate = [](float a, float b, float c, float d,float u) 
+    {
+        const auto temp = (a*(-u*u*u+3*u*u-3*u+1)+b*(3*u*u*u-6*u*u+4)+c*(-3*u*u*u+3*u*u+3*u+1)+d*u*u*u)/6;
+        return temp;
+    };
     for(auto& object:objects){
         object.intersect(ray,interactions);
     }
-    for(auto vdbgrid: vdbgrids){
-        float scale=vdbgrid->voxelSize()[0];
-        auto acc = vdbgrid->getAccessor();
-        auto dda=openvdb::math::DDA(ray.worldToIndex(*vdbgrid));
-        Interaction interaction;
-        openvdb::Vec3f pos;
-        interaction.type=interaction.VOXEL;
-        while(dda.step()){
-            if(acc.isValueOn(dda.voxel())){
-                interaction.dist=dda.time()*scale;
-                pos=ray.worldToIndex(*vdbgrid)(dda.time());
-                //std::cout<<pos;
-                //std::cout<<dda.voxel()<<'\n';
+    float time=ray.t0();
+    while(time<=ray.t1()){
+        openvdb::Vec3f pos=ray(time);
+        int i=0;
+        for(i=0;i<vdbgrids.size();i++){
+            if(!vdbAABBboxes[i].isInside(pos)) break;
+        }
+        if(i>0){
+            i--;
+            openvdb::Vec3f indexpos=vdbgrids[i]->worldToIndex(pos);
+            openvdb::Coord ijk(openvdb::tools::local_util::floorVec3(indexpos));
+            Interaction interaction;
+            float scale=vdbgrids[i]->voxelSize()[0];
+            auto acc = vdbgrids[i]->getAccessor();
+                interaction.dist=time;
+                interaction.type=interaction.VOXEL;
                 interaction.scale=scale;
-                /*
-                float data[2][2][2];
-                openvdb::Coord ijk(openvdb::tools::local_util::floorVec3(pos));
-                pos=ray(interaction.dist);
-                interaction.pos[0]=pos[0];
-                interaction.pos[1]=pos[1];
-                interaction.pos[2]=pos[2];
-                data[0][0][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[0][0][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[1]+=1;
-                data[0][1][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]-=1;
-                data[0][1][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[0]+=1;
-                ijk[1]-=1;
-                data[1][0][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]+=1;
-                data[1][0][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[1]+=1;
-                data[1][1][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                ijk[2]-=1;
-                data[1][1][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-                */
-                openvdb::Vec3R uvw=openvdb::Vec3R(pos)-openvdb::tools::local_util::floorVec3(pos);
-                /*
-                auto _interpolate = [](float a, float b, float weight)
-                {
-                    const auto temp = (b - a) * weight;
-                    return (a + temp);
-                };
-                interaction.value=_interpolate(
-                    _interpolate(
-                        _interpolate(data[0][0][0], data[0][0][1], uvw[2]),
-                        _interpolate(data[0][1][0], data[0][1][1], uvw[2]),
-                        uvw[1]),
-                    _interpolate(
-                        _interpolate(data[1][0][0], data[1][0][1], uvw[2]),
-                        _interpolate(data[1][1][0], data[1][1][1], uvw[2]),
-                        uvw[1]),
-                uvw[0]);
-                */
-               float data[4][4][4];
-                openvdb::Coord ijk(openvdb::tools::local_util::floorVec3(pos));
+                openvdb::Vec3R uvw=openvdb::Vec3R(indexpos)-openvdb::tools::local_util::floorVec3(indexpos);
+                float data[4][4][4];
                 ijk[0]--;ijk[1]--;ijk[2]--;
                 data[0][0][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
                 ijk[2]+=1;
@@ -211,11 +183,6 @@ void Scene::intersect(openvdb::math::Ray<float>& ray, std::vector<Interaction>& 
                 data[3][3][2]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
                 ijk[2]+=1;
                 data[3][3][3]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
-               auto _interpolate = [](float a, float b, float c, float d,float u) 
-                {
-                    const auto temp = (a*(-u*u*u+3*u*u-3*u+1)+b*(3*u*u*u+6*u*u+4)+c*(-3*u*u*u+3*u*u+3*u+1)+d*u*u*u)/6;
-                    return temp;
-                };
                 interaction.value=_interpolate(
                     _interpolate(
                         _interpolate(data[0][0][0], data[0][0][1], data[0][0][2], data[0][0][3], uvw[2]),
@@ -242,8 +209,14 @@ void Scene::intersect(openvdb::math::Ray<float>& ray, std::vector<Interaction>& 
                         _interpolate(data[3][3][0], data[3][3][1], data[3][3][2], data[3][3][3], uvw[2]),
                         uvw[1]),
                 uvw[0]);
+                interaction.pos[0]=pos[0];
+                interaction.pos[0]=pos[1];
+                interaction.pos[0]=pos[2];
                 interactions.push_back(interaction);
-            }
+                time+=scale;
+        }
+        else{
+            time+=vdbgrids[0]->voxelSize()[0];
         }
     }
     std::sort(interactions.begin(),interactions.end(),[](Interaction& a,Interaction& b){

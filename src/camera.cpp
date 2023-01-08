@@ -74,9 +74,6 @@ void Camera::shotimage(Scene& scene){
         for(j=0;j<image.resolution.x();j++) {
             std::vector<Interaction> interactions;
             scene.intersect(generateray(j,i),interactions);
-            //if(j==1500&&i==500){
-            //    for(auto inter:interactions) std::cout<<inter.pos<<' '<<inter.value<<'\n';
-            //}
             image.setpixel(j,image.resolution.y()-1-i,transferfunction(interactions));
         }
     }
@@ -93,7 +90,7 @@ openvdb::math::Ray<float> Camera::generateray(int x,int y){
 
 Vec3i Camera::transferfunction(std::vector<Interaction>& interactions){
     if(interactions.size()==0) return{0,0,0};
-    else //return Vec3i(floor(interactions[0].pos[0]*20),floor(interactions[0].pos[1]*20),floor(interactions[0].pos[2]*20));
+    else
     {
         int length = interactions.size();
         Vec3f radiance={0,0,0};
@@ -103,8 +100,6 @@ Vec3i Camera::transferfunction(std::vector<Interaction>& interactions){
         for(int i=0 ; i < length ; i++)
         {
             if(interactions[i].type==Interaction::VOXEL){
-            if(interactions[i].inside(Vec3f{4.232f,1.224f,2.232f},Vec3f{5.768f,2.76f,3.768f})){
-                if(interactions[i].scale==0.008f){
                     if(interactions[i].value<1.9f/30.f&&interactions[i].value>1.8f/30.f){
                         s+=t*Vec3f((interactions[i].value*30.0f-1.8f)/0.2f+0.5f,(1.9f-interactions[i].value*30.0f)/0.2f,0);
                         t*=.8f;
@@ -117,40 +112,6 @@ Vec3i Camera::transferfunction(std::vector<Interaction>& interactions){
                         s+=t*Vec3f(0,interactions[i].value*30.0f/1.5f,(1.5f-interactions[i].value*30.0f)/1.5f);
                         t*=.8f;
                     }
-                }
-            }
-            else if(interactions[i].inside(Vec3f{4.016f,0.816f,1.648f},Vec3f{6.768f,3.152f,4.368f})){
-                if(interactions[i].scale==0.016f){
-                    if(interactions[i].value<1.9f/30.f&&interactions[i].value>1.8f/30.f){
-                        s+=t*Vec3f((interactions[i].value*30.0f-1.8f)/0.2f+0.5f,(1.9f-interactions[i].value*30.0f)/0.2f,0);
-                        t*=.8f;
-                    }
-                    else if(interactions[i].value<=1.8f/30.f&&interactions[i].value>1.5f/30.f){
-                        s+=t*Vec3f((interactions[i].value*30.0f-1.5f)/0.6f,(1.8f-interactions[i].value*30.0f)/0.6f+0.5f,0);
-                        t*=.8f;
-                    }
-                    else if(interactions[i].value<=1.5f/30.f&&interactions[i].value>=0.f/30.f){
-                        s+=t*Vec3f(0,interactions[i].value*30.0f/1.5f,(1.5f-interactions[i].value*30.0f)/1.5f);
-                        t*=.8f;
-                    }
-                }
-            }
-            else{
-                if(interactions[i].scale==0.032f){
-                    if(interactions[i].value<1.9f/30.f&&interactions[i].value>1.8f/30.f){
-                        s+=t*Vec3f((interactions[i].value*30.0f-1.8f)/0.2f+0.5f,(1.9f-interactions[i].value*30.0f)/0.2f,0);
-                        t*=.8f;
-                    }
-                    else if(interactions[i].value<=1.8f/30.f&&interactions[i].value>1.5f/30.f){
-                        s+=t*Vec3f((interactions[i].value*30.0f-1.5f)/0.6f,(1.8f-interactions[i].value*30.0f)/0.6f+0.5f,0);
-                        t*=.8f;
-                    }
-                    else if(interactions[i].value<=1.5f/30.f&&interactions[i].value>=0.f/30.f){
-                        s+=t*Vec3f(0,interactions[i].value*30.0f/1.5f,(1.5f-interactions[i].value*30.0f)/1.5f);
-                        t*=.8f;
-                    }
-                }
-            }
             }
             else if(interactions[i].type==Interaction::GEOMETRY){
                 s+=Vec3f{0.3f,0.3f,0.3f};
