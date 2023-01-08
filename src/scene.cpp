@@ -77,7 +77,7 @@ void Scene::intersect(openvdb::math::Ray<float>& ray, std::vector<Interaction>& 
                     for(int y=0;y<4;y++){
                         for(int z=0;z<4;z++){
                             openvdb::Coord realijk(ijk[0]+x,ijk[1]+y,ijk[2]+z);
-                            if(acc[i].isValueOn(realijk)) data[x][y][z]=acc[i].getValue(realijk);
+                            if(acc[i].isValueOn(realijk)) data[x][y][z]=acc[i].getValue(realijk)*powf(4.f,float(i));
                             else if(i>0) goto label;
                             else data[x][y][z]=0;
                         }

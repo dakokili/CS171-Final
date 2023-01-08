@@ -82,6 +82,8 @@ void Camera::shotimage(Scene& scene){
                 ans+=transferfunction(interactions);
             }
             image.setpixel(j,image.resolution.y()-1-i,ans/SPP);
+            //scene.intersect(generateray(float(j)+0.5f,float(i)+0.5f),interactions);
+            //image.setpixel(j,image.resolution.y()-1-i,transferfunction(interactions));
         }
     }
     image.writefile("result.png");
@@ -100,9 +102,10 @@ Vec3i Camera::transferfunction(std::vector<Interaction>& interactions){
     {
         int length = interactions.size();
         Vec3f s={0,0,0};
-        float t=.03f;
+        float t=.1f;
         int count=0;
-        bool objhit=false;
+        bool objhit=false,first=false,inside=false;
+        float sum=0;
         auto _ratio= [](int counter,float t){
             auto temp=0.0f;
             for(int i=0;i<counter;i++) temp=temp*(1-t)+t;
@@ -111,20 +114,28 @@ Vec3i Camera::transferfunction(std::vector<Interaction>& interactions){
         for(int i=0 ; i < length ; i++)
         {
             if(interactions[i].type==Interaction::VOXEL){
-                interactions[i].value*=6500.f;
+                interactions[i].value*=4800.f;
                 if(interactions[i].value>1.f){
-                    count++;
-                    s*=1-t;
-                    s+=t*Vec3f(1.f/interactions[i].value,1.f-1.f/interactions[i].value,0);
+                    count+=interactions[i].scale/0.008f;
+                    for(int k=0;k<interactions[i].scale/0.008f;k++){
+                        s*=1-t;
+                        s+=t*Vec3f(1.f/powf(interactions[i].value,.3f),1.f-1.f/powf(interactions[i].value,.3f),0);
+                    }
                 }
+                else inside=false;
             }
             else if(interactions[i].type==Interaction::GEOMETRY){
-                if(count>0) s*=_ratio(count,t);
+                if(count>0){
+                    s*=_ratio(count,t);
+                }
+                //if(sum>1.f) s+=Vec3f(1.f/powf(sum,.5f),1.f-1.f/powf(sum,.5f),0);
                 else s+=Vec3f{.8f,.3f,.8f}*(.4f+.2f*std::max(0.f,interactions[i].normal.dot(Vec3f(0,10,0)-interactions[i].pos)));
                 objhit=true;
                 break;
             }
+            
         }
+        //if(!objhit&&sum>1.f) s+=Vec3f(1.f/powf(sum,.5f),1.f-1.f/powf(sum,.5f),0);
         if(!objhit&&count>0) s*=_ratio(count,t);
         return converttoRGB(s);
     }
