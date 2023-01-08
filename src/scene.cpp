@@ -9,11 +9,26 @@ void Scene::loadgridfromfile(std::string filepath){
     file.open();
     openvdb::GridPtrVecPtr sourcegrids = file.getGrids();
     for(auto basegrid : *sourcegrids){
-        basegrid->print();
         openvdb::Vec3SGrid::Ptr sourcegrid = openvdb::gridPtrCast<openvdb::Vec3SGrid>(basegrid);
-        vdbgrids.push_back(sourcegrid->deepCopy());
-        vdbAABB box;
+        openvdb::FloatGrid::Ptr newgrid = openvdb::FloatGrid::create();
         auto acc=sourcegrid->getAccessor();
+        auto acc2=newgrid->getAccessor();
+        for(auto iter=sourcegrid->beginValueOn();iter.test();++iter){
+            auto coord=iter.getCoord();
+            auto Qx=(acc.isValueOn(coord+openvdb::Coord(1,0,0))? acc.getValue(coord+openvdb::Coord(1,0,0)):acc.getValue(coord))
+            -(acc.isValueOn(coord+openvdb::Coord(-1,0,0))? acc.getValue(coord+openvdb::Coord(-1,0,0)):acc.getValue(coord));
+            auto Qy=(acc.isValueOn(coord+openvdb::Coord(0,1,0))? acc.getValue(coord+openvdb::Coord(0,1,0)):acc.getValue(coord))
+            -(acc.isValueOn(coord+openvdb::Coord(0,-1,0))? acc.getValue(coord+openvdb::Coord(0,-1,0)):acc.getValue(coord));
+            auto Qz=(acc.isValueOn(coord+openvdb::Coord(0,0,1))? acc.getValue(coord+openvdb::Coord(0,0,1)):acc.getValue(coord))
+            -(acc.isValueOn(coord+openvdb::Coord(0,0,-1))? acc.getValue(coord+openvdb::Coord(0,0,-1)):acc.getValue(coord));
+            float newvalue=abs(0.5f*(Qx[0]*Qx[0]+Qy[1]*Qy[1]+Qz[2]*Qz[2])+Qy[0]*Qx[1]+Qz[0]*Qx[2]+Qz[1]*Qy[2]);
+            acc2.setValue(coord,newvalue);
+        }
+        newgrid->setTransform(sourcegrid->transformPtr());
+        vdbgrids.push_back(newgrid);
+        newgrid->print();
+        vdbAABB box;
+        box.scale=sourcegrid->voxelSize()[0];
         box.bottom=sourcegrid->indexToWorld(openvdb::Coord(0,0,0));
         box.top=sourcegrid->indexToWorld(openvdb::Coord(basegrid->metaValue<openvdb::Vec3i>(openvdb::Name(sourcegrid->META_FILE_BBOX_MAX))));
         std::cout<<box.bottom<<box.top<<'\n';
@@ -29,6 +44,7 @@ void Scene::loadobjectfromfile(std::string filepath,float scale,Vec3f pos){
 void Scene::intersect(openvdb::math::Ray<float>& ray, std::vector<Interaction>& interactions){
     auto _interpolate = [](float a, float b, float c, float d,float u) 
     {
+        //const auto temp = b*(1-u)+c*u;
         const auto temp = (a*(-u*u*u+3*u*u-3*u+1)+b*(3*u*u*u-6*u*u+4)+c*(-3*u*u*u+3*u*u+3*u+1)+d*u*u*u)/6;
         return temp;
     };
@@ -36,30 +52,34 @@ void Scene::intersect(openvdb::math::Ray<float>& ray, std::vector<Interaction>& 
         object.intersect(ray,interactions);
     }
     float time=ray.t0();
+    std::vector<openvdb::v10_0::FloatGrid::Accessor> acc;
+    for(int k=0;k<vdbgrids.size();k++) acc.push_back(vdbgrids[k]->getAccessor());
     while(time<=ray.t1()){
         openvdb::Vec3f pos=ray(time);
         int i=0;
-        for(i=0;i<vdbgrids.size();i++){
+        while(i<vdbgrids.size()){
             if(!vdbAABBboxes[i].isInside(pos)) break;
+            i++;
         }
         if(i>0){
+            float data[4][4][4];
+            Interaction interaction;
+            interaction.dist=time;
+            interaction.type=interaction.VOXEL;
+            label:
             i--;
             openvdb::Vec3f indexpos=vdbgrids[i]->worldToIndex(pos);
             openvdb::Coord ijk(openvdb::tools::local_util::floorVec3(indexpos));
-            Interaction interaction;
-            float scale=vdbgrids[i]->voxelSize()[0];
-            auto acc = vdbgrids[i]->getAccessor();
-                interaction.dist=time;
-                interaction.type=interaction.VOXEL;
-                interaction.scale=scale;
-                openvdb::Vec3R uvw=openvdb::Vec3R(indexpos)-openvdb::tools::local_util::floorVec3(indexpos);
-                float data[4][4][4];
-                ijk[0]--;ijk[1]--;ijk[2]--;
+            interaction.scale=vdbAABBboxes[i].scale;
+            openvdb::Vec3R uvw=openvdb::Vec3R(indexpos)-openvdb::tools::local_util::floorVec3(indexpos);
+            ijk[0]--;ijk[1]--;ijk[2]--;
                 for(int x=0;x<4;x++){
                     for(int y=0;y<4;y++){
                         for(int z=0;z<4;z++){
                             openvdb::Coord realijk(ijk[0]+x,ijk[1]+y,ijk[2]+z);
-                            data[x][y][z]=(acc.isValueOn(realijk))? acc.getValue(realijk).length():1;
+                            if(acc[i].isValueOn(realijk)) data[x][y][z]=acc[i].getValue(realijk);
+                            else if(i>0) goto label;
+                            else data[x][y][z]=0;
                         }
                     }
                 }
@@ -93,7 +113,7 @@ void Scene::intersect(openvdb::math::Ray<float>& ray, std::vector<Interaction>& 
                 interaction.pos[0]=pos[1];
                 interaction.pos[0]=pos[2];
                 interactions.push_back(interaction);
-                time+=scale;
+                time+=vdbAABBboxes[i].scale;
         }
         else{
             break;
