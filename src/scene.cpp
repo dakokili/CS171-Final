@@ -34,16 +34,17 @@ void Scene::intersect(openvdb::math::Ray<float>& ray, std::vector<Interaction>& 
         interaction.type=interaction.VOXEL;
         while(dda.step()){
             if(acc.isValueOn(dda.voxel())){
-                interaction.dist=dda.next()*scale;
+                interaction.dist=dda.time()*scale;
                 pos=ray.worldToIndex(*vdbgrid)(dda.time());
                 //std::cout<<pos;
                 //std::cout<<dda.voxel()<<'\n';
-                interaction.pos[0]=pos[0];
-                interaction.pos[1]=pos[1];
-                interaction.pos[2]=pos[2];
                 interaction.scale=scale;
                 float data[2][2][2];
                 openvdb::Coord ijk(openvdb::tools::local_util::floorVec3(pos));
+                pos=ray(interaction.dist);
+                interaction.pos[0]=pos[0];
+                interaction.pos[1]=pos[1];
+                interaction.pos[2]=pos[2];
                 data[0][0][0]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;
                 ijk[2]+=1;
                 data[0][0][1]=(acc.isValueOn(ijk))? acc.getValue(ijk).length():1;

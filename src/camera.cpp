@@ -66,17 +66,17 @@ void Camera::shotimage(Scene& scene){
     int count=0;
     omp_set_nested(1);
     omp_set_dynamic(0);
-#pragma omp parallel for schedule(guided) num_threads(8) private(j)
+#pragma omp parallel for schedule(guided) num_threads(12) private(j)
     for(i=0;i<image.resolution.y();i++){
 #pragma omp atomic
         ++count;
-        //printf("\r%.02f%%", count * 100.0 / image.resolution.y());
+        printf("\r%.02f%%", count * 100.0 / image.resolution.y());
         for(j=0;j<image.resolution.x();j++) {
             std::vector<Interaction> interactions;
             scene.intersect(generateray(j,i),interactions);
-            if(j==1500&&i==500){
-                for(auto inter:interactions) std::cout<<inter.pos<<' '<<inter.value<<'\n';
-            }
+            //if(j==1500&&i==500){
+            //    for(auto inter:interactions) std::cout<<inter.pos<<' '<<inter.value<<'\n';
+            //}
             image.setpixel(j,image.resolution.y()-1-i,transferfunction(interactions));
         }
     }
@@ -98,30 +98,64 @@ Vec3i Camera::transferfunction(std::vector<Interaction>& interactions){
         int length = interactions.size();
         Vec3f radiance={0,0,0};
         Vec3f s={0,0,0};
-        float t=.8f;
+        float t=.2f;
         bool bound=false;
         for(int i=0 ; i < length ; i++)
         {
-            //if(!bound&&interactions[i].type==Interaction::VOXEL){
-            //    s+=t*Vec3f(0,1,0);
-            //    bound=true;
-            //} 
-            //if(interactions[i].value<1.9f/30.f&&interactions[i].value>=1.2f/30.f){
-            //    s+=t*Vec3f(1,0,0);
-            //    t*=0.9f;
-            //}
-            if(interactions[i].value<1.9f/30.f&&interactions[i].value>0.f/30.f){
-                s+=t*Vec3f(interactions[i].value*30.0f/1.9f,1.f-interactions[i].value*30.0f/1.9f,0);
-                t*=.2f;
+            if(interactions[i].type==Interaction::VOXEL){
+            if(interactions[i].inside(Vec3f{4.232f,1.224f,2.232f},Vec3f{5.768f,2.76f,3.768f})){
+                if(interactions[i].scale==0.008f){
+                    if(interactions[i].value<1.9f/30.f&&interactions[i].value>1.8f/30.f){
+                        s+=t*Vec3f((interactions[i].value*30.0f-1.8f)/0.2f+0.5f,(1.9f-interactions[i].value*30.0f)/0.2f,0);
+                        t*=.8f;
+                    }
+                    else if(interactions[i].value<=1.8f/30.f&&interactions[i].value>1.5f/30.f){
+                        s+=t*Vec3f((interactions[i].value*30.0f-1.5f)/0.6f,(1.8f-interactions[i].value*30.0f)/0.6f+0.5f,0);
+                        t*=.8f;
+                    }
+                    else if(interactions[i].value<=1.5f/30.f&&interactions[i].value>=0.f/30.f){
+                        s+=t*Vec3f(0,interactions[i].value*30.0f/1.5f,(1.5f-interactions[i].value*30.0f)/1.5f);
+                        t*=.8f;
+                    }
+                }
             }
-            //if(interactions[i].value<0.8f/30.f&&interactions[i].value>=0.2f/30.f){
-            //    s+=t*Vec3f(0,0,1);
-            //    t*=0.9f;
-            //}
-            //if(interactions[i].value>0.0680f&&interactions[i].value<=0.0681f){
-            //    s+=t*Vec3f(0,0,1);
-            //}
-            
+            else if(interactions[i].inside(Vec3f{4.016f,0.816f,1.648f},Vec3f{6.768f,3.152f,4.368f})){
+                if(interactions[i].scale==0.016f){
+                    if(interactions[i].value<1.9f/30.f&&interactions[i].value>1.8f/30.f){
+                        s+=t*Vec3f((interactions[i].value*30.0f-1.8f)/0.2f+0.5f,(1.9f-interactions[i].value*30.0f)/0.2f,0);
+                        t*=.8f;
+                    }
+                    else if(interactions[i].value<=1.8f/30.f&&interactions[i].value>1.5f/30.f){
+                        s+=t*Vec3f((interactions[i].value*30.0f-1.5f)/0.6f,(1.8f-interactions[i].value*30.0f)/0.6f+0.5f,0);
+                        t*=.8f;
+                    }
+                    else if(interactions[i].value<=1.5f/30.f&&interactions[i].value>=0.f/30.f){
+                        s+=t*Vec3f(0,interactions[i].value*30.0f/1.5f,(1.5f-interactions[i].value*30.0f)/1.5f);
+                        t*=.8f;
+                    }
+                }
+            }
+            else{
+                if(interactions[i].scale==0.032f){
+                    if(interactions[i].value<1.9f/30.f&&interactions[i].value>1.8f/30.f){
+                        s+=t*Vec3f((interactions[i].value*30.0f-1.8f)/0.2f+0.5f,(1.9f-interactions[i].value*30.0f)/0.2f,0);
+                        t*=.8f;
+                    }
+                    else if(interactions[i].value<=1.8f/30.f&&interactions[i].value>1.5f/30.f){
+                        s+=t*Vec3f((interactions[i].value*30.0f-1.5f)/0.6f,(1.8f-interactions[i].value*30.0f)/0.6f+0.5f,0);
+                        t*=.8f;
+                    }
+                    else if(interactions[i].value<=1.5f/30.f&&interactions[i].value>=0.f/30.f){
+                        s+=t*Vec3f(0,interactions[i].value*30.0f/1.5f,(1.5f-interactions[i].value*30.0f)/1.5f);
+                        t*=.8f;
+                    }
+                }
+            }
+            }
+            else if(interactions[i].type==Interaction::GEOMETRY){
+                s+=Vec3f{0.3f,0.3f,0.3f};
+                break;
+            }
         }
         return converttoRGB(s);
     }

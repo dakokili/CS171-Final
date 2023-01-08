@@ -6,10 +6,12 @@ TriangleMesh::TriangleMesh(std::string filename,float scale,Vec3f pos){
   std::ifstream file(filename);
   std::string buf;
   Vec3f buf2;
-  int buf3[6];
+  bool flag=false;
+  char buf3[100];
+  int buf4[6];
   while(!file.eof()){
     file>>buf;
-    if(buf=="n"){
+    if(buf=="vn"){
       file>>buf2[0]>>buf2[1]>>buf2[2];
       normals.push_back(buf2);
     }
@@ -18,13 +20,33 @@ TriangleMesh::TriangleMesh(std::string filename,float scale,Vec3f pos){
       vertices.push_back(buf2*scale+pos);
     }
     else if(buf=="f"){
-      file>>buf3[0]>>buf3[1]>>buf3[2]>>buf3[3]>>buf3[4]>>buf3[5];
-      v_indices.push_back(buf3[0]);
-      v_indices.push_back(buf3[2]);
-      v_indices.push_back(buf3[4]);
-      n_indices.push_back(buf3[1]);
-      n_indices.push_back(buf3[3]);
-      n_indices.push_back(buf3[5]);
+      file.getline(buf3,100);
+      bool state=false;
+      int k=0;
+      for(int i=0;i<100;i++){
+        if(buf3[i]=='\0') break;
+        if((buf3[i]>=48)&&(buf3[i]<58)){
+          if(!state){
+            state=true;
+            buf4[k]=buf3[i]-'0';
+          }
+          else{
+            buf4[k]=buf4[k]*10+buf3[i]-'0';
+          }
+        }
+        else{
+          if(state){
+            k++;
+            state=false;
+          }
+        }
+      }
+      v_indices.push_back(buf4[0]-1);
+      v_indices.push_back(buf4[2]-1);
+      v_indices.push_back(buf4[4]-1);
+      n_indices.push_back(buf4[1]-1);
+      n_indices.push_back(buf4[3]-1);
+      n_indices.push_back(buf4[5]-1);
     }
   }
   file.close();
