@@ -9,7 +9,7 @@
 #include <algorithm>
 
 Image::Image(){
-    resolution.x() = 1500;
+    resolution.x() = 2500;
     resolution.y() = 1000;
     RGBpixels.swap(std::vector<uint8_t>(resolution.x()*resolution.y()*3,0));
 };
@@ -98,14 +98,14 @@ openvdb::math::Ray<float> Camera::generateray(float x,float y){
 
 Vec3i Camera::transferfunction(std::vector<Interaction>& interactions){
     if(interactions.size()==0) return{0,0,0};
+    
     else
     {
         int length = interactions.size();
         Vec3f s={0,0,0};
         float t=.1f;
         int count=0;
-        bool objhit=false,first=false,inside=false;
-        float sum=0;
+        bool objhit=false;
         auto _ratio= [](int counter,float t){
             auto temp=0.0f;
             for(int i=0;i<counter;i++) temp=temp*(1-t)+t;
@@ -122,21 +122,51 @@ Vec3i Camera::transferfunction(std::vector<Interaction>& interactions){
                         s+=t*Vec3f(1.f/powf(interactions[i].value,.3f),1.f-1.f/powf(interactions[i].value,.3f),0);
                     }
                 }
-                else inside=false;
             }
             else if(interactions[i].type==Interaction::GEOMETRY){
                 if(count>0){
                     s*=_ratio(count,t);
                 }
-                //if(sum>1.f) s+=Vec3f(1.f/powf(sum,.5f),1.f-1.f/powf(sum,.5f),0);
                 else s+=Vec3f{.8f,.3f,.8f}*(.4f+.2f*std::max(0.f,interactions[i].normal.dot(Vec3f(0,10,0)-interactions[i].pos)));
                 objhit=true;
                 break;
             }
             
         }
-        //if(!objhit&&sum>1.f) s+=Vec3f(1.f/powf(sum,.5f),1.f-1.f/powf(sum,.5f),0);
         if(!objhit&&count>0) s*=_ratio(count,t);
         return converttoRGB(s);
     }
+    
+    /*
+    else
+    {
+        int length = interactions.size();
+        Vec3f radiance={0,0,0};
+        Vec3f s={0,0,0};
+        float t=.2f;
+        bool bound=false;
+        for(int i=0 ; i < length ; i++)
+        {
+            if(interactions[i].type==Interaction::VOXEL){
+                    if(interactions[i].value<1.9f/30.f&&interactions[i].value>1.8f/30.f){
+                        s*=1-t;
+                        s+=t*Vec3f((interactions[i].value*30.0f-1.8f)/0.2f+0.5f,(1.9f-interactions[i].value*30.0f)/0.2f,0);
+                    }
+                    else if(interactions[i].value<=1.8f/30.f&&interactions[i].value>1.5f/30.f){
+                        s*=1-t;
+                        s+=t*Vec3f((interactions[i].value*30.0f-1.5f)/0.6f,(1.8f-interactions[i].value*30.0f)/0.6f+0.5f,0);
+                    }
+                    else if(interactions[i].value<=1.5f/30.f&&interactions[i].value>=0.f/30.f){
+                        s*=1-t;
+                        s+=t*Vec3f(0,interactions[i].value*30.0f/1.5f,(1.5f-interactions[i].value*30.0f)/1.5f);
+                    }
+            }
+            else if(interactions[i].type==Interaction::GEOMETRY){
+                s+=Vec3f{.8f,.3f,.8f}*(.4f+.2f*std::max(0.f,interactions[i].normal.dot(Vec3f(0,10,0)-interactions[i].pos)));
+                break;
+            }
+        }
+        return converttoRGB(s);
+    }
+    */
 }

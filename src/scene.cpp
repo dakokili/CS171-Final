@@ -15,6 +15,7 @@ void Scene::loadgridfromfile(std::string filepath){
         auto acc2=newgrid->getAccessor();
         for(auto iter=sourcegrid->beginValueOn();iter.test();++iter){
             auto coord=iter.getCoord();
+            
             auto Qx=(acc.isValueOn(coord+openvdb::Coord(1,0,0))? acc.getValue(coord+openvdb::Coord(1,0,0)):acc.getValue(coord))
             -(acc.isValueOn(coord+openvdb::Coord(-1,0,0))? acc.getValue(coord+openvdb::Coord(-1,0,0)):acc.getValue(coord));
             auto Qy=(acc.isValueOn(coord+openvdb::Coord(0,1,0))? acc.getValue(coord+openvdb::Coord(0,1,0)):acc.getValue(coord))
@@ -22,6 +23,8 @@ void Scene::loadgridfromfile(std::string filepath){
             auto Qz=(acc.isValueOn(coord+openvdb::Coord(0,0,1))? acc.getValue(coord+openvdb::Coord(0,0,1)):acc.getValue(coord))
             -(acc.isValueOn(coord+openvdb::Coord(0,0,-1))? acc.getValue(coord+openvdb::Coord(0,0,-1)):acc.getValue(coord));
             float newvalue=abs(0.5f*(Qx[0]*Qx[0]+Qy[1]*Qy[1]+Qz[2]*Qz[2])+Qy[0]*Qx[1]+Qz[0]*Qx[2]+Qz[1]*Qy[2]);
+            
+            //float newvalue=acc.getValue(coord).length();
             acc2.setValue(coord,newvalue);
         }
         newgrid->setTransform(sourcegrid->transformPtr());
@@ -78,8 +81,10 @@ void Scene::intersect(openvdb::math::Ray<float>& ray, std::vector<Interaction>& 
                         for(int z=0;z<4;z++){
                             openvdb::Coord realijk(ijk[0]+x,ijk[1]+y,ijk[2]+z);
                             if(acc[i].isValueOn(realijk)) data[x][y][z]=acc[i].getValue(realijk)*powf(4.f,float(i));
+                            //if(acc[i].isValueOn(realijk)) data[x][y][z]=acc[i].getValue(realijk);
                             else if(i>0) goto label;
                             else data[x][y][z]=0;
+                            //else data[x][y][z]=1;
                         }
                     }
                 }
@@ -117,7 +122,6 @@ void Scene::intersect(openvdb::math::Ray<float>& ray, std::vector<Interaction>& 
         }
         else{
             break;
-            //time+=vdbgrids[0]->voxelSize()[0];
         }
     }
     std::sort(interactions.begin(),interactions.end(),[](Interaction& a,Interaction& b){
