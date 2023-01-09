@@ -18,9 +18,9 @@ using Vec3i = Eigen::Vector3i;
 using Vec2i = Eigen::Vector2i;
 using Vec2f = Eigen::Vector2f;
 
-constexpr bool velocity=false;        //false for Q-criterion, true for velocity
+constexpr bool velocity=true;        //false for Q-criterion, true for velocity
 constexpr bool linearorbspline=false; //flase for b-spline, true for linear
-constexpr float transparency=0.2f;
+constexpr float transparency=0.1f;
 
 constexpr int SPP=10;
 constexpr float RAY_DEFAULT_MIN = 1e-5;
