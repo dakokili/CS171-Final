@@ -1,10 +1,14 @@
 \documentclass[acmtog]{acmart}
+\usepackage{geometry}
 \usepackage{graphicx}
 \usepackage{subfigure}
 \usepackage{natbib}
 \usepackage{listings}
 \usepackage{bm}
 \usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode} 
 
 \definecolor{blve}{rgb}{0.3372549 , 0.61176471, 0.83921569}
 \definecolor{gr33n}{rgb}{0.29019608, 0.7372549, 0.64705882}
@@ -25,10 +29,10 @@
 % Title portion
 \title{Final project: {Multi-Resolution Isosurface Rendering}}
 
-\author{Name:\quad QiYukun  \\ student number:\ 2020533002
-	\\email:\quad qiyk@shanghaitech.edu.cn\\}
-\author{Name:\quad DiHaichuan  \\ student number:\ 2020533116
-	\\email:\quad dihch@shanghaitech.edu.cn}
+\author{Name:\quad QiYukun  student number:\ 2020533002
+	email:\quad qiyk@shanghaitech.edu.cn\\}
+\author{Name:\quad DiHaichuan   student number:\ 2020533116
+	email:\quad dihch@shanghaitech.edu.cn}
 
 % Document starts
 \begin{document}
@@ -58,6 +62,23 @@
 	There are many ways to visualize volume data. In this we choose the most directly way. We use direct volume rendering method. In this method, we generate rays to traverse the girds, and then calculate the approximate value by interpolation. If the value is in the data range we need, we give it a color based on its value, and use volume rendering to show layers of data. In our method, we think that there are vacuum between two satisfied data, so transparency will be only determined by how many layers of data it has hit not by distance.    
 	\subsection{Data traversal in multi-resolution grids.}
 	In library OpenVdb, it gives a function to do data traversal, however the function only make sure that it will march a grid but not make ensure the step length is same. Thus, we write a our own function to do data traversal. In this function, the step is decided by the resulotion of the grid and it will skip choose the finer one when overlap happens. Also, our function can skip empty grids.
+	\begin{algorithm}[!h]
+		\caption{Data traversal}%算法标题
+		\begin{algorithmic}[1]%一行一个标行号
+			\Function{DDA}{$scene,ray,interaction$}
+			\State $ object.intersect(ray)$
+			\Comment intersection with surface
+			\While{$t$ < $t_{max}$ and t is in grid}
+			\If{grid is active}
+				\State  find finest resolution
+				\State  doing interpolation
+			\EndIf
+			\State  $t+=finest resolution$
+			\EndWhile
+			\State  $sort(interaction list)$
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm}
 	\subsection{Interpolation.}
 	In each cell, it contains the value of its bottom front left corner, so we need to do interpolation.
 	Basicly, we can use three-linear interpolation, which do linear interpolation on line, surface and volume of nearby 2X2X2 data. However, it will cause stripe of girds on the result. Thus, we use
@@ -66,22 +87,26 @@
 	We decide the color by the value of interpolation by the function Color = $ (value^{-0.3},1-value^{-0.3},0) $ and convert it into a integer vector in range of [0,255].
 	\subsection{Some other tasks.}
 	We use super-scaling method to do anti-aliasing and use BVH tree to store the mesh of sphere.
+	\section{Division of work}
+	Qi Yuchun mainly complete the load of data and data traversal in VDB.
+	Di Haichuan mainly complete volume rendering and value interpolation.
 	\section{Results}
 	% pictures should be in
-	\begin{figure}[ht]\centering 
+	\begin{figure}[htb]\centering 
 		\subfigure[Figure1]{
 			\centering
 			\includegraphics[height=3.5cm,width=5.25cm]{result-bspline-trans10.png}
 		}\\
 		\label{Figure1}
 	\end{figure}
-	\begin{figure}[ht]\centering 
+	\begin{figure}[htb]\centering 
 		\subfigure[Figure2]{
 			\centering
 			\includegraphics[height=3.5cm,width=8.75cm]{result-velomodel.png}
 		}\\
 		\label{Figure1}
 	\end{figure}
-
+	
+	
 	
 \end{document}
