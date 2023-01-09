@@ -9,7 +9,7 @@
 #include <algorithm>
 
 Image::Image(){
-    resolution.x() = 2500;
+    resolution.x() = 1500;
     resolution.y() = 1000;
     RGBpixels.swap(std::vector<uint8_t>(resolution.x()*resolution.y()*3,0));
 };
