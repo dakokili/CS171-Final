@@ -80,11 +80,40 @@
 		\end{algorithmic}
 	\end{algorithm}
 	\subsection{Interpolation.}
-	In each cell, it contains the value of its bottom front left corner, so we need to do interpolation.
-	Basicly, we can use three-linear interpolation, which do linear interpolation on line, surface and volume of nearby 2X2X2 data. However, it will cause stripe of girds on the result. Thus, we use
-	cubic B-spline interpolation, which use nearby 4X4X4 data.
+	In each cell, it contains the value of its bottom front left corner, so we need to do interpolation.Basicly, we can use trilinear interpolation, which do linear interpolation on line, surface and volume of nearby 2X2X2 data. However, it will cause stripe of girds on the result. Thus, we use cubic B-spline interpolation, which use nearby 4X4X4 data.
+	\begin{figure}[htbp]\centering 
+		\centering
+		\includegraphics[height=3cm,width=7.5cm]{1.png}
+		\caption{Tensor-product linear interpolations: linear, bilinear, and trilinear}
+	\end{figure}\\
+	\begin{equation}
+		\begin{split}
+			&f(P_{ab})\,=\,(1-x)f(a)+xf(b) \\
+			&f(P_{cd})\,=\,(1-x)f(c)+xf(d) \\
+			&f(P_{abcd})\,=\,(1-y)f(P_{ab})+yf(P_{cd}) \\
+			&f(P)\,=\,(1-z)f(P_{abcd})+yf(P_{efgh}) \\
+		\end{split}		
+	\end{equation}
+	Above figures and functions shows the procession of trilinear interpolation. Likely, cubic B-spline interpolation also use nearby values to approximate. Following equations
+	showing how to process a linear cubic B-spline interpolation.
+	\begin{equation}
+		\begin{split}
+			&g(x)\,=\, \Sigma_{i=0}^{4} w_i(u)f_i \; with\,u\,=\,x-[x]\\
+			&w_0(u)\,=\,\frac{1}{6}(-u^3+3u^2-3u+1) \\
+			&w_1(u)\,=\,\frac{1}{6}(3u^3-6u^2+4) \\
+			&w_2(u)\,=\,\frac{1}{6}(-3u^3+3u^2+3u+1) \\
+			&w_3(u)\,=\,\frac{1}{6}u^3 \\
+		\end{split}		
+	\end{equation}
 	\subsection{Classification.}
-	We decide the color by the value of interpolation by the function Color = $ (value^{-0.3},1-value^{-0.3},0) $ and convert it into a integer vector in range of [0,255].
+	If we choose to visualize speed field, we just need to directly calculate the norm of velocity vectors. However, if we decide to show another field calculate by velocity field like Q-criterion, we need do some pre-interpolation.
+	\begin{equation}
+		\begin{split}
+			&Q\,=\,-\frac{1}{2}((\frac{\partial u}{\partial x})^2+(\frac{\partial v}{\partial y})^2+(\frac{\partial w}{\partial z})^2)-\frac{\partial u}{\partial y}\frac{\partial v}{\partial x}-\frac{\partial u}{\partial z}\frac{\partial w}{\partial x}-\frac{\partial v}{\partial z}\frac{\partial w}{\partial y}\\
+			&f(x)'\,=\,\frac{f(x+h)-f(x-h)}{2h} \\
+		\end{split}		
+	\end{equation}
+	After pre-interpolation, we normalize all values.We decide the color by the value of interpolation by the function Color = $ (value^{-0.3},1-value^{-0.3},0) $ and convert it into a integer vector in range of [0,255].
 	\subsection{Some other tasks.}
 	We use super-scaling method to do anti-aliasing and use BVH tree to store the mesh of sphere.
 	\section{Division of work}
@@ -92,19 +121,15 @@
 	Di Haichuan mainly complete volume rendering and value interpolation.
 	\section{Results}
 	% pictures should be in
-	\begin{figure}[htb]\centering 
-		\subfigure[Figure1]{
-			\centering
-			\includegraphics[height=3.5cm,width=5.25cm]{result-bspline-trans10.png}
-		}\\
-		\label{Figure1}
+	\begin{figure}[h]\centering 
+		\centering
+		\includegraphics[height=6.67cm,width=10cm]{result-bspline-trans10.png}\\
+		Speech field
 	\end{figure}
-	\begin{figure}[htb]\centering 
-		\subfigure[Figure2]{
-			\centering
-			\includegraphics[height=3.5cm,width=8.75cm]{result-velomodel.png}
-		}\\
-		\label{Figure1}
+	\begin{figure}[hp]\centering 
+		\centering
+		\includegraphics[height=4cm,width=10cm]{result-velomodel.png}
+		Q-criterion
 	\end{figure}
 	
 	
