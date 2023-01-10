@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.10.7)  10 JAN 2023 15:43
+This is XeTeX, Version 3.141592653-2.6-0.999994 (TeX Live 2022) (preloaded format=xelatex 2022.10.7)  10 JAN 2023 15:56
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1060,8 +1060,8 @@ Overfull \hbox (41.38498pt too wide) in paragraph at lines 126--126
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-File: result-velomodel.png Graphic file (type bmp)
-<result-velomodel.png>
+File: result-velomodel-trans20.png Graphic file (type bmp)
+<result-velomodel-trans20.png>
 
 Overfull \hbox (41.3467pt too wide) in paragraph at lines 131--133
  [][] 
@@ -1094,7 +1094,7 @@ Package rerunfilecheck Info: File `report.out' has not changed.
  ) 
 Here is how much of TeX's memory you used:
  22603 strings out of 476179
- 371526 string characters out of 5813072
+ 371590 string characters out of 5813072
  865921 words of memory out of 5000000
  42823 multiletter control sequences out of 15000+600000
  548422 words of font info for 86 fonts, out of 8000000 for 9000
